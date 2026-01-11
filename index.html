@@ -62,6 +62,21 @@
     });
     ZOHO.embeddedApp.init();
   }
+if (window.ZOHO) {
+  ZOHO.embeddedApp.on("PageLoad", function () {
+    console.log("ZOHO object detected");
+
+    ZOHO.CRM.API.getAccessToken().then(function (res) {
+      console.log("Zoho token response:", res);
+      console.log("Access token value:", res && res.access_token);
+    }).catch(function (err) {
+      console.error("Zoho token error:", err);
+    });
+  });
+  ZOHO.embeddedApp.init();
+}
+
+  
 </script>
 
 
