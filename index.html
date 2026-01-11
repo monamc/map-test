@@ -45,7 +45,7 @@
   });
 
   // Fetch Accounts from backend
-  fetch("https://monamccormick.pythonanywhere.com/map/accounts")
+  fetch("https://monamccormick.pythonanywhere.com/map/accounts?ts=" + Date.now())
     .then(res => res.json())
     .then(accounts => {
       accounts.forEach(a => {
