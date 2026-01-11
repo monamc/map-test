@@ -21,11 +21,7 @@
 <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
 
 <script>
-  console.log("Mapbox loaded:", typeof mapboxgl);
-
-  mapboxgl.accessToken = "pk.eyJ1IjoibW9uYW1jY29ybWljayIsImEiOiJjbWs5c25rcmcwNmwyM2NwenB3d21kZGFzIn0.sTsW8a-JPa6n15Acuugg-Q";
-
-  console.log("Token after set:", mapboxgl.accessToken);
+  mapboxgl.accessToken = "pk.REPLACE_WITH_REAL_TOKEN";
 
   const map = new mapboxgl.Map({
     container: "map",
@@ -33,7 +29,22 @@
     center: [-96, 37],
     zoom: 4
   });
+
+  fetch("https://mapapi-monamccormick.pythonanywhere.com/map/accounts")
+    .then(r => r.json())
+    .then(points => {
+      console.log("points:", points);
+
+      points.forEach(p => {
+        new mapboxgl.Marker()
+          .setLngLat([p.lng, p.lat])
+          .setPopup(new mapboxgl.Popup().setText(p.name))
+          .addTo(map);
+      });
+    })
+    .catch(err => console.error("fetch error:", err));
 </script>
+
 
 </body>
 </html>
