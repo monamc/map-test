@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="utf-8" />
   <title>Accounts Map</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- Mapbox CSS -->
   <link
@@ -11,15 +13,8 @@
   />
 
   <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-    }
-    #map {
-      width: 100%;
-      height: 100%;
-    }
+    body { margin: 0; padding: 0; }
+    #map { width: 100vw; height: 100vh; }
   </style>
 </head>
 <body>
@@ -30,43 +25,29 @@
 <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
 
 <script>
-  /* =========================
-     MAPBOX TOKEN (REQUIRED)
-     ========================= */
+  // 🔴 REQUIRED — MUST BE SET FIRST
   mapboxgl.accessToken = "pk.eyJ1IjoibW9uYW1jY29ybWljayIsImEiOiJjbWs5c25rcmcwNmwyM2NwenB3d21kZGFzIn0.sTsW8a-JPa6n15Acuugg-Q";
 
-  /* =========================
-     INIT MAP
-     ========================= */
+  // Create map
   const map = new mapboxgl.Map({
     container: "map",
-    style: "mapbox://styles/mapbox/streets-v12",
-    center: [-96, 37.8],
+    style: "mapbox://styles/mapbox/streets-v11",
+    center: [-96, 37],
     zoom: 4
   });
 
-  map.addControl(new mapboxgl.NavigationControl());
-
-  /* =========================
-     LOAD ACCOUNTS FROM API
-     ========================= */
+  // Load account pins
   fetch("https://mapapi-monamccormick.pythonanywhere.com/map/accounts")
-    .then(res => res.json())
-    .then(accounts => {
-      accounts.forEach(a => {
-        if (!a.lat || !a.lng) return;
-
+    .then(r => r.json())
+    .then(data => {
+      data.forEach(p => {
         new mapboxgl.Marker()
-          .setLngLat([a.lng, a.lat])
-          .setPopup(
-            new mapboxgl.Popup().setHTML(`<strong>${a.name}</strong>`)
-          )
+          .setLngLat([p.lng, p.lat])
+          .setPopup(new mapboxgl.Popup().setText(p.name))
           .addTo(map);
       });
     })
-    .catch(err => {
-      console.error("Map data load failed:", err);
-    });
+    .catch(err => console.error("Fetch failed:", err));
 </script>
 
 </body>
