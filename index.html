@@ -1,24 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Lead / Account Map</title>
+  <title>Account Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <!-- Mapbox CSS -->
   <link
     href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css"
     rel="stylesheet"
   />
 
   <style>
-    html, body {
+    body {
       margin: 0;
       padding: 0;
-      height: 100%;
-      width: 100%;
+      font-family: Arial, sans-serif;
     }
     #map {
-      height: 100%;
+      position: absolute;
+      top: 0;
+      bottom: 0;
       width: 100%;
     }
   </style>
@@ -27,31 +29,40 @@
 
 <div id="map"></div>
 
+<!-- Mapbox JS -->
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+
 <script>
+  // 🔑 Mapbox token
   mapboxgl.accessToken = "pk.eyJ1IjoibW9uYW1jY29ybWljayIsImEiOiJjbWs5c25rcmcwNmwyM2NwenB3d21kZGFzIn0.sTsW8a-JPa6n15Acuugg-Q";
 
- const map = new mapboxgl.Map({
+  // Initialize map
+  const map = new mapboxgl.Map({
     container: "map",
     style: "mapbox://styles/mapbox/light-v11",
-    center: [-98.5795, 39.8283],
+    center: [-98.5795, 39.8283], // US center
     zoom: 4
   });
 
-  map.on('load', () => {
-    // Test Account Pins
-    const accounts = [
-      { name: "Account A", lat: 40.7128, lng: -74.0060 }, // NYC
-      { name: "Account B", lat: 34.0522, lng: -118.2437 }, // LA
-      { name: "Account C", lat: 41.8781, lng: -87.6298 }  // Chicago
-    ];
+  // Fetch Accounts from backend
+  fetch("https://monamccormick.pythonanywhere.com/map/accounts")
+    .then(res => res.json())
+    .then(accounts => {
+      accounts.forEach(a => {
+        if (!a.lat || !a.lng) return;
 
-    accounts.forEach(a => {
-      new mapboxgl.Marker({ color: "#003366" })
-        .setLngLat([a.lng, a.lat])
-        .setPopup(new mapboxgl.Popup().setText(a.name))
-        .addTo(map);
+        const popup = new mapboxgl.Popup({ offset: 25 })
+          .setText(a.name || "Account");
+
+        new mapboxgl.Marker({ color: "#2563eb" })
+          .setLngLat([a.lng, a.lat])
+          .setPopup(popup)
+          .addTo(map);
+      });
+    })
+    .catch(err => {
+      console.error("Error loading account data:", err);
     });
-  });
 </script>
 
 </body>
