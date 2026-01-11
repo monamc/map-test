@@ -27,20 +27,14 @@ const map = new mapboxgl.Map({
 });
 
 // 🔴 THIS IS THE ONLY DATA SOURCE
-fetch("https://monamccormick.pythonanywhere.com/map/accounts")
-  .then(res => res.json())
-  .then(accounts => {
-    accounts.forEach(a => {
-      new mapboxgl.Marker()
-        .setLngLat([a.lng, a.lat])
-        .setPopup(new mapboxgl.Popup().setText(a.name))
-        .addTo(map);
-    });
+fetch("https://mapapi-monamccormick.pythonanywhere.com/map/accounts")
+  .then(r => r.json())
+  .then(data => {
+    console.log("API data:", data);   // leave this in for now
+    addPinsToMap(data);
   })
-  .catch(err => {
-    console.error("MAP DATA ERROR", err);
-  });
-</script>
+  .catch(err => console.error(err));
+
 
 </body>
 </html>
