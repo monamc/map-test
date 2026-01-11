@@ -2,18 +2,15 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Accounts Map</title>
+  <title>Token Test</title>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- Mapbox CSS -->
   <link
     href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css"
     rel="stylesheet"
   />
 
   <style>
-    body { margin: 0; padding: 0; }
+    body { margin: 0; }
     #map { width: 100vw; height: 100vh; }
   </style>
 </head>
@@ -21,33 +18,21 @@
 
 <div id="map"></div>
 
-<!-- Mapbox JS -->
 <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
 
 <script>
-  // 🔴 REQUIRED — MUST BE SET FIRST
+  console.log("Mapbox loaded:", typeof mapboxgl);
+
   mapboxgl.accessToken = "pk.eyJ1IjoibW9uYW1jY29ybWljayIsImEiOiJjbWs5c25rcmcwNmwyM2NwenB3d21kZGFzIn0.sTsW8a-JPa6n15Acuugg-Q";
 
-  // Create map
+  console.log("Token after set:", mapboxgl.accessToken);
+
   const map = new mapboxgl.Map({
     container: "map",
     style: "mapbox://styles/mapbox/streets-v11",
     center: [-96, 37],
     zoom: 4
   });
-
-  // Load account pins
-  fetch("https://mapapi-monamccormick.pythonanywhere.com/map/accounts")
-    .then(r => r.json())
-    .then(data => {
-      data.forEach(p => {
-        new mapboxgl.Marker()
-          .setLngLat([p.lng, p.lat])
-          .setPopup(new mapboxgl.Popup().setText(p.name))
-          .addTo(map);
-      });
-    })
-    .catch(err => console.error("Fetch failed:", err));
 </script>
 
 </body>
