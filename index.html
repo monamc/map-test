@@ -2,87 +2,75 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Token Test</title>
+  <title>Accounts Map</title>
 
-  <link
-    href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css"
-    rel="stylesheet"
-  />
+  <!-- Mapbox -->
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+
+  <!-- Zoho SDK (safe if not in Zoho) -->
+  <script src="https://live.zwidgets.com/js-sdk/1.3/ZohoEmbededAppSDK.min.js"></script>
 
   <style>
-    body { margin: 0; }
-    #map { width: 100vw; height: 100vh; }
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+    #map {
+      width: 100%;
+      height: 100%;
+    }
   </style>
 </head>
+
 <body>
+  <div id="map"></div>
 
-<div id="map"></div>
+  <script>
+    // 🔑 MAPBOX TOKEN (REPLACE WITH YOUR REAL TOKEN)
+    mapboxgl.accessToken = "pk.eyJ1IjoibW9uYW1jY29ybWljayIsImEiOiJjbWs5c25rcmcwNmwyM2NwenB3d21kZGFzIn0.sTsW8a-JPa6n15Acuugg-Q";
 
-<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-
-<script>
- console.log("SCRIPT LOADED");
-console.log("ZOHO object:", window.ZOHO);
-
-  /* ---------- MAPBOX (PUBLIC, OK) ---------- */
-  mapboxgl.accessToken = "pk.eyJ1IjoibW9uYW1jY29ybWljayIsImEiOiJjbWs5c25rcmcwNmwyM2NwenB3d21kZGFzIn0.sTsW8a-JPa6n15Acuugg-Q";
-
-  const map = new mapboxgl.Map({
-    container: "map",
-    style: "mapbox://styles/mapbox/streets-v11",
-    center: [-96, 37],
-    zoom: 4
-  });
-
-  function addPins(points) {
-    points.forEach(p => {
-      new mapboxgl.Marker()
-        .setLngLat([p.lng, p.lat])
-        .setPopup(new mapboxgl.Popup().setText(p.name))
-        .addTo(map);
+    const map = new mapboxgl.Map({
+      container: "map",
+      style: "mapbox://styles/mapbox/streets-v11",
+      center: [-98, 39],
+      zoom: 4
     });
-  }
 
-  /* ---------- DATA (ZOHO ONLY) ---------- */
-  const API_URL = "https://mapapi-monamccormick.pythonanywhere.com/map/accounts";
+    function isZoho() {
+      return typeof window.ZOHO !== "undefined";
+    }
 
-  if (window.ZOHO) {
-    ZOHO.embeddedApp.on("PageLoad", function () {
-      ZOHO.CRM.API.getAccessToken().then(function (res) {
-        const token = res.access_token;
+    async function loadPins() {
+      if (!isZoho()) {
+        console.log("Public mode — no data loaded");
+        return;
+      }
 
-        fetch(API_URL, {
+      await ZOHO.embeddedApp.init();
+      const token = await ZOHO.CRM.API.getAccessToken();
+
+      const resp = await fetch(
+        "https://mapapi-monamccormick.pythonanywhere.com/map/accounts",
+        {
           headers: {
-            "Authorization": "Zoho-oauthtoken " + token
+            Authorization: "Zoho-oauthtoken " + token
           }
-        })
-        .then(r => r.json())
-        .then(points => {
-          console.log("pins:", points);
-          addPins(points);
-        });
+        }
+      );
+
+      const pins = await resp.json();
+
+      pins.forEach(p => {
+        new mapboxgl.Marker()
+          .setLngLat([p.lng, p.lat])
+          .setPopup(new mapboxgl.Popup().setText(p.name))
+          .addTo(map);
       });
-    });
-    ZOHO.embeddedApp.init();
-  }
-if (window.ZOHO) {
-  ZOHO.embeddedApp.on("PageLoad", function () {
-    console.log("ZOHO object detected");
+    }
 
-    ZOHO.CRM.API.getAccessToken().then(function (res) {
-      console.log("Zoho token response:", res);
-      console.log("Access token value:", res && res.access_token);
-    }).catch(function (err) {
-      console.error("Zoho token error:", err);
-    });
-  });
-  ZOHO.embeddedApp.init();
-}
-
-  
-</script>
-
-
-
+    map.on("load", loadPins);
+  </script>
 </body>
 </html>
