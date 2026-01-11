@@ -30,11 +30,27 @@
 <script>
   mapboxgl.accessToken = "pk.eyJ1IjoibW9uYW1jY29ybWljayIsImEiOiJjbWs5c25rcmcwNmwyM2NwenB3d21kZGFzIn0.sTsW8a-JPa6n15Acuugg-Q";
 
-  const map = new mapboxgl.Map({
+ const map = new mapboxgl.Map({
     container: "map",
     style: "mapbox://styles/mapbox/light-v11",
-    center: [-98.5795, 39.8283], // US center
+    center: [-98.5795, 39.8283],
     zoom: 4
+  });
+
+  map.on('load', () => {
+    // Test Account Pins
+    const accounts = [
+      { name: "Account A", lat: 40.7128, lng: -74.0060 }, // NYC
+      { name: "Account B", lat: 34.0522, lng: -118.2437 }, // LA
+      { name: "Account C", lat: 41.8781, lng: -87.6298 }  // Chicago
+    ];
+
+    accounts.forEach(a => {
+      new mapboxgl.Marker({ color: "#003366" })
+        .setLngLat([a.lng, a.lat])
+        .setPopup(new mapboxgl.Popup().setText(a.name))
+        .addTo(map);
+    });
   });
 </script>
 
