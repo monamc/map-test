@@ -2,17 +2,17 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Accounts Map</title>
+  <title>Lead Account Map</title>
 
   <!-- Mapbox -->
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
-
-  <!-- Zoho SDK (safe if not in Zoho) -->
-  <script src="https://live.zwidgets.com/js-sdk/1.3/ZohoEmbededAppSDK.min.js"></script>
+  <link
+    href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css"
+    rel="stylesheet"
+  />
 
   <style>
-    body, html {
+    html, body {
       margin: 0;
       padding: 0;
       height: 100%;
@@ -28,7 +28,10 @@
   <div id="map"></div>
 
   <script>
-    // 🔑 MAPBOX TOKEN (REPLACE WITH YOUR REAL TOKEN)
+    /* =======================
+       MAPBOX INITIALIZATION
+       ======================= */
+
     mapboxgl.accessToken = "pk.eyJ1IjoibW9uYW1jY29ybWljayIsImEiOiJjbWs5c25rcmcwNmwyM2NwenB3d21kZGFzIn0.sTsW8a-JPa6n15Acuugg-Q";
 
     const map = new mapboxgl.Map({
@@ -38,39 +41,35 @@
       zoom: 4
     });
 
-    function isZoho() {
-      return typeof window.ZOHO !== "undefined";
-    }
+    /* =======================
+       PIN RENDERING
+       ======================= */
 
-    async function loadPins() {
-      if (!isZoho()) {
-        console.log("Public mode — no data loaded");
-        return;
-      }
-
-      await ZOHO.embeddedApp.init();
-      const token = await ZOHO.CRM.API.getAccessToken();
-
-      const resp = await fetch(
-        "https://mapapi-monamccormick.pythonanywhere.com/map/accounts",
-        {
-          headers: {
-            Authorization: "Zoho-oauthtoken " + token
-          }
-        }
-      );
-
-      const pins = await resp.json();
+    function renderPins(pins) {
+      if (!Array.isArray(pins)) return;
 
       pins.forEach(p => {
+        if (!p.lat || !p.lng) return;
+
         new mapboxgl.Marker()
           .setLngLat([p.lng, p.lat])
-          .setPopup(new mapboxgl.Popup().setText(p.name))
+          .setPopup(
+            new mapboxgl.Popup({ offset: 25 }).setText(p.name || "")
+          )
           .addTo(map);
       });
     }
 
-    map.on("load", loadPins);
+    /* =======================
+       RECEIVE DATA FROM ZOHO
+       ======================= */
+
+    window.addEventListener("message", function (event) {
+      if (!event.data) return;
+      if (event.data.type !== "ACCOUNT_PINS") return;
+
+      renderPins(event.data.data);
+    });
   </script>
 </body>
 </html>
