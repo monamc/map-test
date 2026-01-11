@@ -1,68 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="utf-8" />
-  <title>Account Map</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Accounts Map</title>
 
-  <!-- Mapbox CSS -->
-  <link
-    href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css"
-    rel="stylesheet"
-  />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet"/>
 
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-    }
-    #map {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      width: 100%;
-    }
+    body { margin:0; padding:0; }
+    #map { position:absolute; top:0; bottom:0; width:100%; }
   </style>
 </head>
 <body>
 
 <div id="map"></div>
 
-<!-- Mapbox JS -->
-<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-
 <script>
-  // 🔑 Mapbox token
-  mapboxgl.accessToken = "pk.eyJ1IjoibW9uYW1jY29ybWljayIsImEiOiJjbWs5c25rcmcwNmwyM2NwenB3d21kZGFzIn0.sTsW8a-JPa6n15Acuugg-Q";
+mapboxgl.accessToken = "PUT_YOUR_MAPBOX_TOKEN_HERE";
 
-  // Initialize map
-  const map = new mapboxgl.Map({
-    container: "map",
-    style: "mapbox://styles/mapbox/light-v11",
-    center: [-98.5795, 39.8283], // US center
-    zoom: 4
-  });
+const map = new mapboxgl.Map({
+  container: "map",
+  style: "mapbox://styles/mapbox/light-v11",
+  center: [-98.5795, 39.8283],
+  zoom: 4
+});
 
-  // Fetch Accounts from backend
-  fetch("https://monamccormick.pythonanywhere.com/map/accounts?ts=" + Date.now())
-    .then(res => res.json())
-    .then(accounts => {
-      accounts.forEach(a => {
-        if (!a.lat || !a.lng) return;
-
-        const popup = new mapboxgl.Popup({ offset: 25 })
-          .setText(a.name || "Account");
-
-        new mapboxgl.Marker({ color: "#2563eb" })
-          .setLngLat([a.lng, a.lat])
-          .setPopup(popup)
-          .addTo(map);
-      });
-    })
-    .catch(err => {
-      console.error("Error loading account data:", err);
+// 🔴 THIS IS THE ONLY DATA SOURCE
+fetch("https://monamccormick.pythonanywhere.com/map/accounts")
+  .then(res => res.json())
+  .then(accounts => {
+    accounts.forEach(a => {
+      new mapboxgl.Marker()
+        .setLngLat([a.lng, a.lat])
+        .setPopup(new mapboxgl.Popup().setText(a.name))
+        .addTo(map);
     });
+  })
+  .catch(err => {
+    console.error("MAP DATA ERROR", err);
+  });
 </script>
 
 </body>
